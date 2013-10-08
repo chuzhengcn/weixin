@@ -1,19 +1,17 @@
-var crypto = require('crypto'),
-    shasum = crypto.createHash('sha1');
+var crypto = require('crypto');
 
 var Token  = 'yueb202am';
 
 exports.token = function (req, res) {
-    var signature       = req.query.signature,
-        nonce           = req.query.nonce,
-        timestamp       = req.query.timestamp,
-        echostr         = req.query.echostr,
-        encrypted_str   = '';
+    var shasum = crypto.createHash('sha1'),
+        signature           = req.query.signature,
+        echostr             = req.query.echostr,
+        unencrypted_params  = [Token, req.query.timestamp, req.query.nonce].sort().join(),
+        encrypted_str       = '';
 
-    // token、timestamp、nonce三个参数要进行字典序排序  
-    shasum.update(nonce + timestamp + Token) 
+    shasum.update(unencrypted_params) 
 
-    encrypted_str = shasum.digest('hex')
+    encrypted_params = shasum.digest('hex')
 
     if (encrypted_str === signature) {
         res.send(encrypted_str)
