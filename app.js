@@ -28,8 +28,9 @@ app.configure('development', function(){
 app.configure('production', function(){
 })
 //-----------------------route-----------------------------------
-var msg = require('./routes/msg')
-app.get('/msg', msg.token)
+var weixin_interface = require('./routes/interface')
+app.get('/interface', weixin_interface.config)
+app.post('/interface', weixin_interface.receive_reply_msg)
 
 //---------------------------------------------------------------
 http.createServer(app).listen(app.get('port'), function(){

@@ -2,7 +2,7 @@ var crypto = require('crypto');
 
 var Token  = 'yueb202am';
 
-exports.token = function (req, res) {
+exports.config = function (req, res) {
     var shasum = crypto.createHash('sha1'),
         signature           = req.query.signature,
         echostr             = req.query.echostr,
@@ -18,4 +18,8 @@ exports.token = function (req, res) {
     } else {
         res.send({ok : 0, msg : '验证失败'})        
     }
+}
+
+exports.receive_reply_msg = function(req, res) {
+
 }
