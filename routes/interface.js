@@ -21,5 +21,5 @@ exports.config = function (req, res) {
 }
 
 exports.receive_reply_msg = function(req, res) {
-
+    console.log(req.body)
 }
