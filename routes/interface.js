@@ -21,5 +21,9 @@ exports.config = function (req, res) {
 }
 
 exports.receive_reply_msg = function(req, res) {
-    console.log(req.body)
+
+}
+
+function parse_req_xml_to_json(req, cb) {
+    
 }
