@@ -11,7 +11,7 @@ exports.token = function (req, res) {
 
     shasum.update(unencrypted_params) 
 
-    encrypted_params = shasum.digest('hex')
+    encrypted_str = shasum.digest('hex')
 
     if (encrypted_str === signature) {
         res.send(encrypted_str)
