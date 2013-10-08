@@ -14,7 +14,7 @@ exports.token = function (req, res) {
     encrypted_str = shasum.digest('hex')
 
     if (encrypted_str === signature) {
-        res.send(encrypted_str)
+        res.send(echostr)
     } else {
         res.send({ok : 0, msg : '验证失败'})        
     }
