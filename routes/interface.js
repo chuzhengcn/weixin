@@ -1,7 +1,13 @@
 var crypto = require('crypto'),
-    xmlParseString = require('xml2js').parseString;
+    util   = require('util'),
+    async  = require('async'),
+    parseXmlString = require('xml2js').parseString;
 
 var Token  = 'yueb202am';
+
+var reply_type_dict = {
+    'text' : reply_by_text,
+}
 
 exports.config = function (req, res) {
     var shasum = crypto.createHash('sha1'),
@@ -23,12 +29,17 @@ exports.config = function (req, res) {
 
 exports.receive_reply_msg = function(req, res) {
     parse_req_xml_to_json(req, function(err, result) {
-        res.send(result)
+        if (err) {
+            return send_err(res, err)
+        }
+        
+        var msg = get_user_msg_info(result)
+
+        reply_type_dict[msg.msg_type](res, msg, [nothing_to_do])
     })
 }
 
 function parse_req_xml_to_json(req, cb) {
-    console.log(req)
     var body = '';
 
     req.setEncoding('utf8');
@@ -38,10 +49,69 @@ function parse_req_xml_to_json(req, cb) {
     })
 
     req.on('end', function() {
-        console.log(body)
-        xmlParseString(body, function(err, result) {
-            console.log(typeof result)
-            cb(err, result)
-        })
+        parseXmlString(body, cb)
     })
+}
+
+function reply_by_text(res, msg, generate_result_func_arry) {
+    var reply_content  ='<xml>' +
+                            '<ToUserName><![CDATA[%s]]></ToUserName>' +
+                            '<FromUserName><![CDATA[%s]]></FromUserName>' +
+                            '<CreateTime>%d</CreateTime>' +
+                            '<MsgType><![CDATA[text]]></MsgType>' +
+                            '<Content><![CDATA[%s]]></Content>' + 
+                        '</xml>';
+
+    async.waterfall(generate_result_func_arry, function(err, result) {
+        reply_content = util.format(reply_content, msg.from_user_name, msg.to_user_name, Date.now(), result)
+        reply_by_xml_type(res, reply_content)
+    })
+}
+
+function reply_by_xml_type(res, xml_str) {
+    res.type('xml')
+    res.send(xml_str)
+}
+
+function get_user_msg_info(xml_msg) {
+    var msg = xml_msg.xml
+
+    return {
+
+        // common
+        'to_user_name' : msg.ToUserName[0],
+        'from_user_name' : msg.FromUserName[0],
+        'create_time' : msg.CreateTime[0],
+        'msg_type' : msg.MsgType[0],
+        'msg_id' : msg.MsgId[0],
+
+        // text
+        'content' : (msg.Content && msg.Content[0]) || '',
+
+        // pic
+        'pic_url' : (msg.PicUrl && msg.PicUrl[0]) || '',
+
+        // location
+        'location_x' : (msg.Location_X && msg.Location_X[0]) || '',
+        'location_y' : (msg.Location_Y && msg.Location_Y[0]) || '',
+        'scale' : (msg.Scale && msg.Scale[0]) || '',
+        'label' : (msg.Label && msg.Label[0]) || '',
+
+        // link
+        'title' : (msg.Title && msg.Title[0]) || '',
+        'description' : (msg.Location_Y && msg.Description[0]) || '',
+        'url' : (msg.Url && msg.Url[0]) || '',
+
+        // event
+        'event' : (msg.Event && msg.Event[0]) || '',
+        'event_key' : (msg.EventKey && msg.EventKey[0]) || '',
+    }
+}
+
+function nothing_to_do(callback) {
+    callback(null, '草莓熊终于会自动回复了')
+}
+
+function send_err(res, err) {
+    res.send({ok : 0, msg : JSON.stringify(err)})
 }
