@@ -32,10 +32,10 @@ exports.receive_reply_msg = function(req, res) {
         if (err) {
             return send_err(res, err)
         }
-        
+
         var msg = get_user_msg_info(result)
 
-        reply_type_dict[msg.msg_type](res, msg, [nothing_to_do])
+        reply_type_dict[msg.msg_type](res, msg, [text_step_1(msg.content)])
     })
 }
 
@@ -108,8 +108,12 @@ function get_user_msg_info(xml_msg) {
     }
 }
 
-function nothing_to_do(callback) {
-    callback(null, '草莓熊终于会自动回复了')
+function text_step_1(text) {
+    text = '草莓熊终于会自动回复了, 不信把你的话重复一遍：' + text;
+    
+    return function(callback) {
+        callback(null, text)
+    }
 }
 
 function send_err(res, err) {
