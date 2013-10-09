@@ -7,7 +7,8 @@
         "stylus"    : "*",
         "mongodb"   : "*",
         "mongoose"  : "*",
-        "async"     : "*"
+        "async"     : "*",
+        "xml2js"    : "*"
   },
     "engines": {
         "node": "0.10.x",
