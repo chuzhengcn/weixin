@@ -109,8 +109,8 @@ function get_user_msg_info(xml_msg) {
 }
 
 function text_step_1(text) {
-    text = '草莓熊终于会自动回复了, 不信把你的话重复一遍：' + text;
-    
+    text = '我是外交部复读机：' + text;
+
     return function(callback) {
         callback(null, text)
     }
