@@ -28,6 +28,7 @@ exports.receive_reply_msg = function(req, res) {
 }
 
 function parse_req_xml_to_json(req, cb) {
+    console.log(req)
     var body = '';
 
     req.setEncoding('utf8');
@@ -37,10 +38,10 @@ function parse_req_xml_to_json(req, cb) {
     })
 
     req.on('end', function() {
+        console.log(body)
         xmlParseString(body, function(err, result) {
             console.log(typeof result)
             cb(err, result)
         })
     })
-
 }
