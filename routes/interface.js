@@ -1,6 +1,7 @@
 var crypto = require('crypto'),
     util   = require('util'),
     async  = require('async'),
+    helper = require('../helper'),
     parseXmlString = require('xml2js').parseString;
 
 var Token  = 'yueb202am';
@@ -10,7 +11,7 @@ var reply_type_dict = {
 }
 
 exports.config = function (req, res) {
-    var shasum = crypto.createHash('sha1'),
+    var shasum              = crypto.createHash('sha1'),
         signature           = req.query.signature,
         echostr             = req.query.echostr,
         unencrypted_params  = [Token, req.query.timestamp, req.query.nonce].sort().join().replace(/,/g, ''),
@@ -28,28 +29,19 @@ exports.config = function (req, res) {
 }
 
 exports.receive_reply_msg = function(req, res) {
-    parse_req_xml_to_json(req, function(err, result) {
+    helper.parse_req_xml_to_json(req, function(err, result) {
         if (err) {
-            return send_err(res, err)
+            return helper.send_err(res, err)
         }
 
         var msg = get_user_msg_info(result)
 
+        if (!reply_type_dict[msg.msg_type]) {
+            return helper.send_err(res,'不支持的回复类型')
+        }
+
+        // 最后一个参数是计算结果的函数数组
         reply_type_dict[msg.msg_type](res, msg, [text_step_1(msg.content)])
-    })
-}
-
-function parse_req_xml_to_json(req, cb) {
-    var body = '';
-
-    req.setEncoding('utf8');
-
-    req.on('data', function(chunk) {
-        body += chunk
-    })
-
-    req.on('end', function() {
-        parseXmlString(body, cb)
     })
 }
 
@@ -64,13 +56,8 @@ function reply_by_text(res, msg, generate_result_func_arry) {
 
     async.waterfall(generate_result_func_arry, function(err, result) {
         reply_content = util.format(reply_content, msg.from_user_name, msg.to_user_name, Date.now(), result)
-        reply_by_xml_type(res, reply_content)
+        helper.reply_by_xml_type(res, reply_content)
     })
-}
-
-function reply_by_xml_type(res, xml_str) {
-    res.type('xml')
-    res.send(xml_str)
 }
 
 function get_user_msg_info(xml_msg) {
@@ -114,8 +101,4 @@ function text_step_1(text) {
     return function(callback) {
         callback(null, text)
     }
-}
-
-function send_err(res, err) {
-    res.send({ok : 0, msg : JSON.stringify(err)})
 }
