@@ -1,3 +1,5 @@
+var parseXmlString = require('xml2js').parseString;
+
 function send_err(res, err) {
     res.send({ok : 0, msg : JSON.stringify(err)})
 }

@@ -1,8 +1,7 @@
 var crypto = require('crypto'),
     util   = require('util'),
     async  = require('async'),
-    helper = require('../helper'),
-    parseXmlString = require('xml2js').parseString;
+    helper = require('../helper');
 
 var Token  = 'yueb202am';
 
